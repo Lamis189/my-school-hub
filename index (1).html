@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My School Hub 🎀</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#">🎀 <span>My School Hub</span></a>
+  <div class="actions"><button id="themeBtn">☀️</button><button id="settingsBtn">⚙️</button></div>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <div>
+      <p class="eyebrow">YOUR LITTLE SCHOOL SPACE ✨</p>
+      <h1>Hey! Ready to get some work done? 🌷</h1>
+      <p>Keep your subjects, homework, notes, and questions all in one cute little place.</p>
+    </div>
+    <div class="hero-sticker">📚</div>
+  </section>
+
+  <section class="quick-grid">
+    <button class="feature pink" data-scroll="subjects">📚 <span><b>My Subjects</b><small>See your classes</small></span> →</button>
+    <button class="feature blue" data-scroll="homework">📝 <span><b>Homework</b><small>Track your work</small></span> →</button>
+    <button class="feature purple" data-scroll="notes">📖 <span><b>My Notes</b><small>Save explanations</small></span> →</button>
+    <button class="feature mint" id="helpBtn">🤖 <span><b>Ask for Help</b><small>When you're stuck</small></span> →</button>
+  </section>
+
+  <section class="help-card">
+    <div class="robot">🤖</div>
+    <div>
+      <p class="eyebrow">HOMEWORK HELPER</p>
+      <h2>Don't understand something?</h2>
+      <p>Type what you're stuck on and we'll make a place for a smart explanation.</p>
+      <button class="primary" id="helpBtn2">✨ Get Help</button>
+    </div>
+  </section>
+
+  <section class="section" id="homework">
+    <div class="heading"><div><p class="eyebrow">STAY ON TRACK</p><h2>Coming Up 📅</h2></div><button class="small" id="addHomework">＋ Add homework</button></div>
+    <div id="homeworkList"></div>
+  </section>
+
+  <section class="section" id="subjects">
+    <div class="heading"><div><p class="eyebrow">YOUR CLASSES</p><h2>My Subjects 🎨</h2></div></div>
+    <div class="subjects">
+      <div class="subject math">➗<b>Math</b><small>0 tasks</small></div>
+      <div class="subject science">🔬<b>Science</b><small>0 tasks</small></div>
+      <div class="subject english">📚<b>English</b><small>0 tasks</small></div>
+      <div class="subject social">🌎<b>Social Studies</b><small>0 tasks</small></div>
+      <div class="subject other">✨<b>Other</b><small>Add later</small></div>
+    </div>
+  </section>
+
+  <section class="section" id="notes">
+    <div class="heading"><div><p class="eyebrow">SAVE WHAT YOU LEARN</p><h2>My Notes 💖</h2></div><button class="small" id="addNote">＋ New note</button></div>
+    <div id="notesList" class="notes-list"></div>
+  </section>
+
+  <section class="progress">
+    <div><p class="eyebrow">A LITTLE PROGRESS</p><h2>You're doing great! 🌟</h2><p>Finish homework to fill your progress bar.</p></div>
+    <div class="progress-area"><div class="track"><div id="progress"></div></div><b id="percent">0%</b></div>
+  </section>
+</main>
+
+<div class="modal hidden" id="helpModal">
+  <div class="modal-box">
+    <button class="close" data-close="helpModal">×</button>
+    <div class="modal-icon">🤖</div><p class="eyebrow">HOMEWORK HELPER</p><h2>What are you stuck on?</h2>
+    <textarea id="question" placeholder="Example: I don't understand what my teacher means by..."></textarea>
+    <div class="modes">
+      <button class="mode active" data-mode="simple">🌷 Explain simply</button>
+      <button class="mode" data-mode="steps">🪜 Break into steps</button>
+      <button class="mode" data-mode="practice">🧠 Practice me</button>
+    </div>
+    <button class="primary full" id="explain">✨ Explain this</button>
+    <div class="response hidden" id="response"></div>
+  </div>
+</div>
+
+<div class="modal hidden" id="homeworkModal">
+  <div class="modal-box">
+    <button class="close" data-close="homeworkModal">×</button>
+    <div class="modal-icon">📝</div><p class="eyebrow">NEW HOMEWORK</p><h2>Add something to do</h2>
+    <input id="hwTitle" placeholder="Assignment name">
+    <select id="hwSubject"><option>Math</option><option>Science</option><option>English</option><option>Social Studies</option><option>Other</option></select>
+    <input id="hwDate" type="date">
+    <button class="primary full" id="saveHomework">💾 Save homework</button>
+  </div>
+</div>
+
+<div class="modal hidden" id="noteModal">
+  <div class="modal-box">
+    <button class="close" data-close="noteModal">×</button>
+    <div class="modal-icon">📖</div><p class="eyebrow">NEW NOTE</p><h2>Save something helpful</h2>
+    <input id="noteTitle" placeholder="Note title">
+    <textarea id="noteBody" placeholder="Write your note here..."></textarea>
+    <button class="primary full" id="saveNote">💾 Save note</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
