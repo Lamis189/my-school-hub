@@ -1,205 +1,248 @@
-const HW = "schoolHubHomework";
-const NOTES = "schoolHubNotes";
+const KEY="homework-helper-v2";
 
-let homework = JSON.parse(localStorage.getItem(HW) || "[]");
-let notes = JSON.parse(localStorage.getItem(NOTES) || "[]");
-let mode = "simple";
+let d=JSON.parse(localStorage.getItem(KEY)||"null")||{
+  name:"",
+  subjects:["Math","English","Science"],
+  hw:[],
+  notes:[],
+  dark:false
+};
 
-const $ = (id) => document.getElementById(id);
+const $=id=>document.getElementById(id);
 
-function save() {
-  localStorage.setItem(HW, JSON.stringify(homework));
-  localStorage.setItem(NOTES, JSON.stringify(notes));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({
+  "&":"&amp;",
+  "<":"&lt;",
+  ">":"&gt;",
+  '"':"&quot;",
+  "'":"&#39;"
+}[c]));
+
+function save(){
+  localStorage.setItem(KEY,JSON.stringify(d));
+  render();
 }
 
-function esc(value) {
-  return String(value).replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;",
-    '"': "&quot;", "'": "&#039;"
-  }[c]));
-}
+function render(){
+  document.body.classList.toggle("dark",d.dark);
+  $("theme").textContent=d.dark?"☀️":"🌙";
 
-function formatDate(value) {
-  if (!value) return "No due date";
-  return new Date(value + "T00:00:00").toLocaleDateString(undefined, {
-    month: "short", day: "numeric"
-  });
-}
+  $("greeting").textContent=d.name
+    ?`Hi, ${d.name}! Ready to learn?`
+    :"Hi! Ready to learn?";
 
-function render() {
-  const list = $("homeworkList");
+  $("open").textContent=d.hw.filter(x=>!x.done).length;
+  $("done").textContent=d.hw.filter(x=>x.done).length;
+  $("notesCount").textContent=d.notes.length;
+  $("subCount").textContent=d.subjects.length;
 
-  list.innerHTML = homework.length
-    ? homework.map((item, index) => `
-      <div class="homework">
-        <button class="check ${item.done ? "done" : ""}" data-index="${index}">
-          ${item.done ? "✓" : ""}
-        </button>
-        <div class="hw-info">
-          <b style="${item.done ? "text-decoration:line-through;opacity:.55" : ""}">
-            ${esc(item.title)}
-          </b>
-          <small>${esc(item.subject)}</small>
+  let opts=d.subjects
+    .map(s=>`<option>${esc(s)}</option>`)
+    .join("");
+
+  $("hwSubject").innerHTML=opts;
+  $("noteSubject").innerHTML=opts;
+
+  $("subjects").innerHTML=d.subjects.map((s,i)=>
+    `<span class="chip">${esc(s)}
+      <button onclick="delSub(${i})">×</button>
+    </span>`
+  ).join("");
+
+  let q=$("search").value.toLowerCase();
+  let f=$("filter").value;
+
+  let hw=d.hw.filter(x=>
+    (f=="all"||(f=="done"?x.done:!x.done)) &&
+    (x.title+" "+x.subject).toLowerCase().includes(q)
+  );
+
+  $("hwList").innerHTML=hw.length
+    ?hw.map(x=>`
+      <div class="item ${x.done?"done":""}">
+        <div>
+          <strong>${esc(x.title)}</strong>
+          <div class="meta">
+            ${esc(x.subject)} • ${esc(x.priority)} • ${x.due||"No due date"}
+          </div>
         </div>
-        <span class="date">${formatDate(item.date)}</span>
+        <div>
+          <button class="secondary" onclick="toggle(${x.id})">
+            ${x.done?"↩ Open":"✓ Done"}
+          </button>
+          <button class="secondary" onclick="delHW(${x.id})">🗑️</button>
+        </div>
       </div>
     `).join("")
-    : '<div class="empty">🌷 No homework yet. Add your first assignment!</div>';
+    :"<p class='muted'>No homework here yet 💕</p>";
 
-  document.querySelectorAll(".check").forEach((button) => {
-    button.onclick = () => {
-      homework[Number(button.dataset.index)].done =
-        !homework[Number(button.dataset.index)].done;
-      save();
-      render();
-      updateProgress();
-    };
-  });
+  let nq=$("noteSearch").value.toLowerCase();
 
-  $("notesList").innerHTML = notes.length
-    ? notes.map((note) => `
-      <article class="note">
-        📝
-        <h3>${esc(note.title)}</h3>
-        <p>${esc(note.body)}</p>
-      </article>
+  let ns=d.notes.filter(n=>
+    (n.title+" "+n.text+" "+n.subject)
+    .toLowerCase()
+    .includes(nq)
+  );
+
+  $("noteList").innerHTML=ns.length
+    ?ns.map(n=>`
+      <div class="item">
+        <div>
+          <strong>${esc(n.title)}</strong>
+          <p>${esc(n.text)}</p>
+          <div class="meta">${esc(n.subject)}</div>
+        </div>
+        <button class="secondary" onclick="delNote(${n.id})">🗑️</button>
+      </div>
     `).join("")
-    : '<div class="empty">📝 Your helpful notes will live here.</div>';
+    :"<p class='muted'>No notes yet 🌸</p>";
 
-  document.querySelectorAll(".subject").forEach((subject) => {
-    const name = subject.querySelector("b").textContent;
-    if (name !== "Other") {
-      const count = homework.filter(
-        (item) => item.subject === name && !item.done
-      ).length;
-      subject.querySelector("small").textContent =
-        `${count} task${count === 1 ? "" : "s"}`;
+  let total=d.hw.length;
+  let done=d.hw.filter(x=>x.done).length;
+  let p=total?Math.round(done/total*100):0;
+
+  $("pct").textContent=p+"%";
+  $("bar").style.width=p+"%";
+
+  $("message").textContent=total
+    ?(p==100
+      ?"Amazing! All homework finished! 🎉"
+      :`${done} of ${total} assignments finished. Keep going! 💪`)
+    :"Add homework to get started!";
+}
+
+$("name").onclick=()=>{
+  let n=prompt("What should Homework Helper call you?",d.name);
+
+  if(n!==null){
+    d.name=n.trim();
+    save();
+  }
+};
+
+$("theme").onclick=()=>{
+  d.dark=!d.dark;
+  save();
+};
+
+$("hwForm").onsubmit=e=>{
+  e.preventDefault();
+
+  d.hw.push({
+    id:Date.now(),
+    title:$("hwTitle").value.trim(),
+    subject:$("hwSubject").value,
+    priority:$("priority").value,
+    due:$("due").value,
+    done:false
+  });
+
+  e.target.reset();
+  save();
+};
+
+$("subForm").onsubmit=e=>{
+  e.preventDefault();
+
+  let s=$("subName").value.trim();
+
+  if(s&&!d.subjects.includes(s)){
+    d.subjects.push(s);
+    e.target.reset();
+    save();
+  }
+};
+
+$("noteForm").onsubmit=e=>{
+  e.preventDefault();
+
+  d.notes.push({
+    id:Date.now(),
+    title:$("noteTitle").value.trim(),
+    subject:$("noteSubject").value,
+    text:$("noteText").value.trim()
+  });
+
+  e.target.reset();
+  save();
+};
+
+$("search").oninput=render;
+$("filter").onchange=render;
+$("noteSearch").oninput=render;
+
+window.toggle=id=>{
+  let x=d.hw.find(x=>x.id==id);
+  x.done=!x.done;
+  save();
+};
+
+window.delHW=id=>{
+  d.hw=d.hw.filter(x=>x.id!=id);
+  save();
+};
+
+window.delNote=id=>{
+  d.notes=d.notes.filter(x=>x.id!=id);
+  save();
+};
+
+window.delSub=i=>{
+  if(d.subjects.length>1){
+    d.subjects.splice(i,1);
+    save();
+  }
+};
+
+document.querySelectorAll("[data-mode]").forEach(b=>{
+  b.onclick=()=>{
+    let q=$("helpInput").value.trim();
+
+    if(!q){
+      $("helpOutput").textContent="Type what you're stuck on first 💕";
+      return;
     }
-  });
-}
 
-function updateProgress() {
-  const percent = homework.length
-    ? Math.round(
-        homework.filter((item) => item.done).length /
-        homework.length * 100
-      )
-    : 0;
+    let m=b.dataset.mode;
 
-  $("progress").style.width = percent + "%";
-  $("percent").textContent = percent + "%";
-}
+    if(m=="simple")
+      $("helpOutput").textContent=
+      `Let's make it simple:
 
-function openModal(id) {
-  $(id).classList.remove("hidden");
-}
+Topic: ${q}
 
-function closeModal(id) {
-  $(id).classList.add("hidden");
-}
+Start with the definition, then look at one example, then try one yourself. Focus on one small idea at a time. 💡`;
 
-document.querySelectorAll("[data-scroll]").forEach((button) => {
-  button.onclick = () => {
-    $(button.dataset.scroll).scrollIntoView({ behavior: "smooth" });
+    if(m=="steps")
+      $("helpOutput").textContent=
+      `Break it into steps:
+
+1. Read the question.
+2. Write what you know.
+3. Identify what it asks.
+4. Choose the rule or idea you need.
+5. Do one small step.
+6. Check your answer.
+
+Topic: ${q}`;
+
+    if(m=="practice")
+      $("helpOutput").textContent=
+      `Practice time! ✍️
+
+Explain ${q} in your own words.
+
+Then make one example and solve it without looking at your notes.
+
+Check your work afterward!`;
   };
 });
 
-$("helpBtn").onclick = () => openModal("helpModal");
-$("helpBtn2").onclick = () => openModal("helpModal");
-$("addHomework").onclick = () => openModal("homeworkModal");
-$("addNote").onclick = () => openModal("noteModal");
-
-document.querySelectorAll("[data-close]").forEach((button) => {
-  button.onclick = () => closeModal(button.dataset.close);
-});
-
-document.querySelectorAll(".modal").forEach((modal) => {
-  modal.onclick = (event) => {
-    if (event.target === modal) modal.classList.add("hidden");
-  };
-});
-
-document.querySelectorAll(".mode").forEach((button) => {
-  button.onclick = () => {
-    mode = button.dataset.mode;
-    document.querySelectorAll(".mode").forEach((item) => {
-      item.classList.remove("active");
-    });
-    button.classList.add("active");
-
-    $("explain").textContent =
-      mode === "practice"
-        ? "🧠 Make me a practice question"
-        : mode === "steps"
-        ? "🪜 Break it down"
-        : "✨ Explain this";
-  };
-});
-
-$("explain").onclick = () => {
-  const question = $("question").value.trim();
-  const response = $("response");
-
-  response.classList.remove("hidden");
-
-  response.innerHTML = question
-    ? `🌷 <b>Your question:</b> ${esc(question)}
-       <br><br>
-       This is the V1 helper screen. In V2, we'll connect the AI so it can
-       explain this, break it into steps, or make a practice question for you! ✨`
-    : "🌷 <b>Tell me what you're stuck on first!</b>";
-};
-
-$("saveHomework").onclick = () => {
-  const title = $("hwTitle").value.trim();
-
-  if (!title) {
-    alert("Add an assignment name!");
-    return;
+$("clear").onclick=()=>{
+  if(confirm("Clear all saved Homework Helper data?")){
+    localStorage.removeItem(KEY);
+    location.reload();
   }
-
-  homework.push({
-    title,
-    subject: $("hwSubject").value,
-    date: $("hwDate").value,
-    done: false
-  });
-
-  save();
-  render();
-  updateProgress();
-
-  $("hwTitle").value = "";
-  $("hwDate").value = "";
-  closeModal("homeworkModal");
-};
-
-$("saveNote").onclick = () => {
-  const title = $("noteTitle").value.trim();
-  const body = $("noteBody").value.trim();
-
-  if (!title || !body) {
-    alert("Add a title and note!");
-    return;
-  }
-
-  notes.push({ title, body });
-
-  save();
-  render();
-
-  $("noteTitle").value = "";
-  $("noteBody").value = "";
-  closeModal("noteModal");
-};
-
-$("themeBtn").onclick = () => {
-  alert("Theme controls are coming in V2! 🎀");
-};
-
-$("settingsBtn").onclick = () => {
-  alert("Settings are coming in V2! 🎀");
 };
 
 render();
-updateProgress();
