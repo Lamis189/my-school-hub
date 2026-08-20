@@ -1,110 +1,125 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My School Hub 🎀</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <title>Homework Helper 📚✨</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<header class="topbar">
-  <a class="brand" href="#">🎀 <span>My School Hub</span></a>
-  <div class="actions"><button id="themeBtn">☀️</button><button id="settingsBtn">⚙️</button></div>
-</header>
+  <header>
+    <h1>📚 Homework Helper ✨</h1>
+    <p id="greeting">Welcome! Let's get your homework done 💕</p>
+    <button id="darkModeBtn">🌙 Dark Mode</button>
+  </header>
 
-<main class="container">
-  <section class="hero">
-    <div>
-      <p class="eyebrow">YOUR LITTLE SCHOOL SPACE ✨</p>
-      <h1>Hey! Ready to get some work done? 🌷</h1>
-      <p>Keep your subjects, homework, notes, and questions all in one cute little place.</p>
-    </div>
-    <div class="hero-sticker">📚</div>
-  </section>
+  <main>
+    <section class="card">
+      <h2>📊 Dashboard</h2>
+      <div class="stats">
+        <div>
+          <strong id="openCount">0</strong>
+          <span>Open</span>
+        </div>
+        <div>
+          <strong id="doneCount">0</strong>
+          <span>Finished</span>
+        </div>
+        <div>
+          <strong id="notesCount">0</strong>
+          <span>Notes</span>
+        </div>
+      </div>
+    </section>
 
-  <section class="quick-grid">
-    <button class="feature pink" data-scroll="subjects">📚 <span><b>My Subjects</b><small>See your classes</small></span> →</button>
-    <button class="feature blue" data-scroll="homework">📝 <span><b>Homework</b><small>Track your work</small></span> →</button>
-    <button class="feature purple" data-scroll="notes">📖 <span><b>My Notes</b><small>Save explanations</small></span> →</button>
-    <button class="feature mint" id="helpBtn">🤖 <span><b>Ask for Help</b><small>When you're stuck</small></span> →</button>
-  </section>
+    <section class="card">
+      <h2>📝 Homework Tracker</h2>
 
-  <section class="help-card">
-    <div class="robot">🤖</div>
-    <div>
-      <p class="eyebrow">HOMEWORK HELPER</p>
-      <h2>Don't understand something?</h2>
-      <p>Type what you're stuck on and we'll make a place for a smart explanation.</p>
-      <button class="primary" id="helpBtn2">✨ Get Help</button>
-    </div>
-  </section>
+      <input id="homeworkInput" type="text" placeholder="What homework do you have?">
 
-  <section class="section" id="homework">
-    <div class="heading"><div><p class="eyebrow">STAY ON TRACK</p><h2>Coming Up 📅</h2></div><button class="small" id="addHomework">＋ Add homework</button></div>
-    <div id="homeworkList"></div>
-  </section>
+      <select id="priorityInput">
+        <option value="Low">🟢 Low Priority</option>
+        <option value="Medium">🟡 Medium Priority</option>
+        <option value="High">🔴 High Priority</option>
+      </select>
 
-  <section class="section" id="subjects">
-    <div class="heading"><div><p class="eyebrow">YOUR CLASSES</p><h2>My Subjects 🎨</h2></div></div>
-    <div class="subjects">
-      <div class="subject math">➗<b>Math</b><small>0 tasks</small></div>
-      <div class="subject science">🔬<b>Science</b><small>0 tasks</small></div>
-      <div class="subject english">📚<b>English</b><small>0 tasks</small></div>
-      <div class="subject social">🌎<b>Social Studies</b><small>0 tasks</small></div>
-      <div class="subject other">✨<b>Other</b><small>Add later</small></div>
-    </div>
-  </section>
+      <input id="dueDateInput" type="date">
 
-  <section class="section" id="notes">
-    <div class="heading"><div><p class="eyebrow">SAVE WHAT YOU LEARN</p><h2>My Notes 💖</h2></div><button class="small" id="addNote">＋ New note</button></div>
-    <div id="notesList" class="notes-list"></div>
-  </section>
+      <button id="addHomeworkBtn">➕ Add Homework</button>
 
-  <section class="progress">
-    <div><p class="eyebrow">A LITTLE PROGRESS</p><h2>You're doing great! 🌟</h2><p>Finish homework to fill your progress bar.</p></div>
-    <div class="progress-area"><div class="track"><div id="progress"></div></div><b id="percent">0%</b></div>
-  </section>
-</main>
+      <input id="homeworkSearch" type="text" placeholder="🔎 Search homework...">
 
-<div class="modal hidden" id="helpModal">
-  <div class="modal-box">
-    <button class="close" data-close="helpModal">×</button>
-    <div class="modal-icon">🤖</div><p class="eyebrow">HOMEWORK HELPER</p><h2>What are you stuck on?</h2>
-    <textarea id="question" placeholder="Example: I don't understand what my teacher means by..."></textarea>
-    <div class="modes">
-      <button class="mode active" data-mode="simple">🌷 Explain simply</button>
-      <button class="mode" data-mode="steps">🪜 Break into steps</button>
-      <button class="mode" data-mode="practice">🧠 Practice me</button>
-    </div>
-    <button class="primary full" id="explain">✨ Explain this</button>
-    <div class="response hidden" id="response"></div>
-  </div>
-</div>
+      <div class="filters">
+        <button onclick="filterHomework('all')">All</button>
+        <button onclick="filterHomework('open')">Open</button>
+        <button onclick="filterHomework('done')">Done</button>
+      </div>
 
-<div class="modal hidden" id="homeworkModal">
-  <div class="modal-box">
-    <button class="close" data-close="homeworkModal">×</button>
-    <div class="modal-icon">📝</div><p class="eyebrow">NEW HOMEWORK</p><h2>Add something to do</h2>
-    <input id="hwTitle" placeholder="Assignment name">
-    <select id="hwSubject"><option>Math</option><option>Science</option><option>English</option><option>Social Studies</option><option>Other</option></select>
-    <input id="hwDate" type="date">
-    <button class="primary full" id="saveHomework">💾 Save homework</button>
-  </div>
-</div>
+      <ul id="homeworkList"></ul>
+    </section>
 
-<div class="modal hidden" id="noteModal">
-  <div class="modal-box">
-    <button class="close" data-close="noteModal">×</button>
-    <div class="modal-icon">📖</div><p class="eyebrow">NEW NOTE</p><h2>Save something helpful</h2>
-    <input id="noteTitle" placeholder="Note title">
-    <textarea id="noteBody" placeholder="Write your note here..."></textarea>
-    <button class="primary full" id="saveNote">💾 Save note</button>
-  </div>
-</div>
+    <section class="card">
+      <h2>📚 My Subjects</h2>
 
-<script src="script.js"></script>
+      <input id="subjectInput" type="text" placeholder="Add a subject...">
+      <button id="addSubjectBtn">➕ Add Subject</button>
+
+      <ul id="subjectList"></ul>
+    </section>
+
+    <section class="card">
+      <h2>📖 Notes</h2>
+
+      <input id="noteSubject" type="text" placeholder="Subject">
+      <textarea id="noteInput" placeholder="Write your notes here..."></textarea>
+
+      <button id="addNoteBtn">💾 Save Note</button>
+
+      <input id="noteSearch" type="text" placeholder="🔎 Search notes...">
+
+      <div id="notesList"></div>
+    </section>
+
+    <section class="card helper">
+      <h2>🤖 Homework Helper</h2>
+      <p>What do you need help understanding?</p>
+
+      <textarea id="questionInput" placeholder="Type your question here..."></textarea>
+
+      <div class="helperButtons">
+        <button onclick="helperAction('explain')">💡 Explain Simply</button>
+        <button onclick="helperAction('steps')">🪜 Break Into Steps</button>
+        <button onclick="helperAction('practice')">✏️ Practice Me</button>
+      </div>
+
+      <div id="helperResponse"></div>
+    </section>
+
+    <section class="card">
+      <h2>📈 Progress</h2>
+
+      <div class="progress-container">
+        <div id="progressBar"></div>
+      </div>
+
+      <p id="progressText">0% complete</p>
+    </section>
+
+    <section class="card">
+      <h2>⚙️ Settings</h2>
+
+      <label for="nameInput">Your name:</label>
+      <input id="nameInput" type="text" placeholder="Enter your name">
+
+      <button id="saveNameBtn">💾 Save Name</button>
+    </section>
+  </main>
+
+  <footer>
+    <p>Made with 💕 for better studying 📚✨</p>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
