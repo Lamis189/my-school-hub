@@ -3,123 +3,319 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Homework Helper 📚✨</title>
+  <title>Math Hub 💗</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <header>
-    <h1>📚 Homework Helper ✨</h1>
-    <p id="greeting">Welcome! Let's get your homework done 💕</p>
-    <button id="darkModeBtn">🌙 Dark Mode</button>
-  </header>
 
-  <main>
-    <section class="card">
-      <h2>📊 Dashboard</h2>
-      <div class="stats">
-        <div>
-          <strong id="openCount">0</strong>
-          <span>Open</span>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">🧮</div>
+      <div>
+        <h1>Math Hub</h1>
+        <p>Learn. Practice. Succeed. 💗</p>
+      </div>
+    </div>
+
+    <nav>
+      <button class="nav-btn active">🏠 <span>Home</span></button>
+      <button class="nav-btn">🤖 <span>AI Tutor</span></button>
+      <button class="nav-btn">📚 <span>Courses</span></button>
+      <button class="nav-btn">🧮 <span>Calculator</span></button>
+      <button class="nav-btn">🔄 <span>Unit Converter</span></button>
+      <button class="nav-btn">📄 <span>Formula Sheets</span></button>
+      <button class="nav-btn">✏️ <span>Practice Questions</span></button>
+      <button class="nav-btn">📅 <span>Planner</span></button>
+      <button class="nav-btn">📊 <span>Progress</span></button>
+      <button class="nav-btn">🔖 <span>Bookmarks</span></button>
+      <button class="nav-btn">⚙️ <span>Settings</span></button>
+      <button class="nav-btn">❓ <span>Help & FAQ</span></button>
+    </nav>
+
+    <div class="sidebar-note">
+      ☕
+      <p>"Small steps every day lead to big results!"</p>
+      💗
+    </div>
+  </aside>
+
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- HEADER -->
+    <header class="top-header">
+      <div>
+        <h2>Welcome back! ✨</h2>
+        <p>What would you like to learn today?</p>
+      </div>
+
+      <div class="header-right">
+        <input type="search" placeholder="Search anything... 🔍">
+        <div class="student">👤 Hi, Student!⌄</div>
+      </div>
+    </header>
+
+
+    <div class="dashboard">
+
+      <!-- LEFT SIDE -->
+      <section class="left-column">
+
+        <!-- AI TUTOR -->
+        <div class="card ai-card">
+          <div class="card-title">
+            <div>
+              <h2>Ask AI Tutor 🤖 <span class="beta">BETA</span></h2>
+              <p>Upload a picture of your question or type it out. I'll explain it step-by-step!</p>
+            </div>
+          </div>
+
+          <div class="ai-area">
+
+            <label class="upload-box">
+              <div class="upload-icon">☁️</div>
+              <h3>Upload Image</h3>
+              <p>Click to upload a math question</p>
+              <small>JPG, PNG</small>
+              <input type="file" accept="image/*" hidden>
+            </label>
+
+            <div class="ai-answer">
+              <div class="question-bubble">
+                Can you solve this step by step?
+              </div>
+
+              <div class="answer-box">
+                <strong>🤖 Math Hub AI</strong>
+
+                <p>
+                  Sure! I'll help you solve it step-by-step.
+                </p>
+
+                <ol>
+                  <li>Understand the question.</li>
+                  <li>Choose the correct formula.</li>
+                  <li>Work through each step.</li>
+                  <li>Check the final answer.</li>
+                </ol>
+
+                <p class="answer-ending">
+                  Ask me a question to get started! 💗
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="chat-box">
+            <input type="text" placeholder="Ask anything...">
+            <button>➤ Send</button>
+          </div>
         </div>
-        <div>
-          <strong id="doneCount">0</strong>
-          <span>Finished</span>
+
+
+        <!-- COURSES -->
+        <div class="section-heading">
+          <h2>📚 Courses</h2>
         </div>
-        <div>
-          <strong id="notesCount">0</strong>
-          <span>Notes</span>
+
+        <div class="courses">
+
+          <div class="course-card yellow">
+            <div class="course-icon">√x</div>
+            <h3>Foundation 20</h3>
+            <p>Build your foundation in math.</p>
+            <button>Explore</button>
+          </div>
+
+          <div class="course-card pink">
+            <div class="course-icon">📈</div>
+            <h3>Foundation 30</h3>
+            <p>Level up your algebra skills.</p>
+            <button>Explore</button>
+          </div>
+
+          <div class="course-card yellow">
+            <div class="course-icon">ƒ(x)</div>
+            <h3>Pre-Calculus 20</h3>
+            <p>Functions, equations and more.</p>
+            <button>Explore</button>
+          </div>
+
+          <div class="course-card pink">
+            <div class="course-icon">sin θ</div>
+            <h3>Pre-Calculus 30</h3>
+            <p>Trigonometry, logarithms & more.</p>
+            <button>Explore</button>
+          </div>
+
+          <div class="course-card yellow">
+            <div class="course-icon">∫x dx</div>
+            <h3>Calculus</h3>
+            <p>Limits, derivatives & integrals.</p>
+            <button>Explore</button>
+          </div>
+
         </div>
-      </div>
-    </section>
 
-    <section class="card">
-      <h2>📝 Homework Tracker</h2>
 
-      <input id="homeworkInput" type="text" placeholder="What homework do you have?">
+        <!-- TOOLS -->
+        <div class="section-heading">
+          <h2>🛠️ Tools</h2>
+        </div>
 
-      <select id="priorityInput">
-        <option value="Low">🟢 Low Priority</option>
-        <option value="Medium">🟡 Medium Priority</option>
-        <option value="High">🔴 High Priority</option>
-      </select>
+        <div class="tools">
 
-      <input id="dueDateInput" type="date">
+          <div class="tool-card">
+            <div>🧮</div>
+            <h3>Calculator</h3>
+            <p>Quick calculations</p>
+          </div>
 
-      <button id="addHomeworkBtn">➕ Add Homework</button>
+          <div class="tool-card">
+            <div>🔄</div>
+            <h3>Unit Converter</h3>
+            <p>Length, area, volume & more</p>
+          </div>
 
-      <input id="homeworkSearch" type="text" placeholder="🔎 Search homework...">
+          <div class="tool-card">
+            <div>📄</div>
+            <h3>Formula Sheets</h3>
+            <p>All formulas in one place</p>
+          </div>
 
-      <div class="filters">
-        <button onclick="filterHomework('all')">All</button>
-        <button onclick="filterHomework('open')">Open</button>
-        <button onclick="filterHomework('done')">Done</button>
-      </div>
+          <div class="tool-card">
+            <div>✏️</div>
+            <h3>Practice Questions</h3>
+            <p>Practice by topic</p>
+          </div>
 
-      <ul id="homeworkList"></ul>
-    </section>
+          <div class="tool-card">
+            <div>ƒx</div>
+            <h3>Equation Solver</h3>
+            <p>Solve equations step-by-step</p>
+          </div>
 
-    <section class="card">
-      <h2>📚 My Subjects</h2>
+          <div class="tool-card">
+            <div>📈</div>
+            <h3>Graphing Tool</h3>
+            <p>Graph functions & equations</p>
+          </div>
 
-      <input id="subjectInput" type="text" placeholder="Add a subject...">
-      <button id="addSubjectBtn">➕ Add Subject</button>
+        </div>
 
-      <ul id="subjectList"></ul>
-    </section>
+      </section>
 
-    <section class="card">
-      <h2>📖 Notes</h2>
 
-      <input id="noteSubject" type="text" placeholder="Subject">
-      <textarea id="noteInput" placeholder="Write your notes here..."></textarea>
+      <!-- RIGHT SIDE -->
+      <section class="right-column">
 
-      <button id="addNoteBtn">💾 Save Note</button>
+        <!-- PLANNER -->
+        <div class="card planner">
 
-      <input id="noteSearch" type="text" placeholder="🔎 Search notes...">
+          <div class="planner-header">
+            <div>
+              <h2>📅 Today's Planner</h2>
+              <p>Thursday, May 16</p>
+            </div>
 
-      <div id="notesList"></div>
-    </section>
+            <button>View Full Planner</button>
+          </div>
 
-    <section class="card helper">
-      <h2>🤖 Homework Helper</h2>
-      <p>What do you need help understanding?</p>
+          <div class="task yellow-task">
+            <strong>4:00 PM</strong>
+            <div>
+              <b>Pre-Calculus 30</b>
+              <p>Study: Trigonometric Identities</p>
+            </div>
+            <input type="checkbox">
+          </div>
 
-      <textarea id="questionInput" placeholder="Type your question here..."></textarea>
+          <div class="task pink-task">
+            <strong>5:30 PM</strong>
+            <div>
+              <b>Practice Questions</b>
+              <p>Worksheet: Limits</p>
+            </div>
+            <input type="checkbox">
+          </div>
 
-      <div class="helperButtons">
-        <button onclick="helperAction('explain')">💡 Explain Simply</button>
-        <button onclick="helperAction('steps')">🪜 Break Into Steps</button>
-        <button onclick="helperAction('practice')">✏️ Practice Me</button>
-      </div>
+          <div class="task yellow-task">
+            <strong>7:00 PM</strong>
+            <div>
+              <b>Homework</b>
+              <p>Page 245 #1–15</p>
+            </div>
+            <input type="checkbox">
+          </div>
 
-      <div id="helperResponse"></div>
-    </section>
+          <div class="task pink-task">
+            <strong>8:30 PM</strong>
+            <div>
+              <b>Review</b>
+              <p>Watch lesson / Take notes</p>
+            </div>
+            <input type="checkbox">
+          </div>
 
-    <section class="card">
-      <h2>📈 Progress</h2>
+          <button class="add-task">＋ Add Task</button>
 
-      <div class="progress-container">
-        <div id="progressBar"></div>
-      </div>
+        </div>
 
-      <p id="progressText">0% complete</p>
-    </section>
 
-    <section class="card">
-      <h2>⚙️ Settings</h2>
+        <!-- REMINDERS -->
+        <div class="card reminders">
 
-      <label for="nameInput">Your name:</label>
-      <input id="nameInput" type="text" placeholder="Enter your name">
+          <h2>🔔 Reminders</h2>
 
-      <button id="saveNameBtn">💾 Save Name</button>
-    </section>
+          <div class="reminder">
+            <span>○</span>
+            <b>Quiz: Functions</b>
+            <small>May 20</small>
+          </div>
+
+          <div class="reminder">
+            <span>○</span>
+            <b>Test: Polynomials</b>
+            <small>May 24</small>
+          </div>
+
+          <div class="reminder">
+            <span>○</span>
+            <b>Assignment: Trig Identities</b>
+            <small>May 27</small>
+          </div>
+
+          <a href="#">View All Reminders →</a>
+
+        </div>
+
+
+        <!-- MOTIVATION -->
+        <div class="card motivation">
+          <div class="quote">“</div>
+          <h3>
+            The expert in anything<br>
+            was once a beginner.
+          </h3>
+          <p>— Keep going! 🌻</p>
+          <div class="heart">♥</div>
+        </div>
+
+      </section>
+
+    </div>
+
+    <footer>
+      Stay organized. Keep practicing. You'll get there! 💗
+    </footer>
+
   </main>
 
-  <footer>
-    <p>Made with 💕 for better studying 📚✨</p>
-  </footer>
-
   <script src="script.js"></script>
+
 </body>
 </html>
