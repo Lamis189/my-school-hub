@@ -1,0 +1,11 @@
+{
+  "name": "my-school-hub",
+  "main": "worker.js",
+  "compatibility_date": "2026-09-04",
+  "assets": {
+    "directory": "."
+  },
+  "ai": {
+    "binding": "AI"
+  }
+}
