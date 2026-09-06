@@ -1,6 +1,7 @@
 export default {
   async fetch(request, env) {
-    // Allow your website to talk to the AI
+
+    // Allow the website to communicate with the AI
     if (request.method === "OPTIONS") {
       return new Response(null, {
         headers: {
@@ -13,46 +14,74 @@ export default {
 
     const url = new URL(request.url);
 
-    // AI Tutor endpoint
+    // AI Tutor
     if (url.pathname === "/api/tutor" && request.method === "POST") {
+
       try {
         const data = await request.json();
+
+        const question =
+          data.question ||
+          "Please help me with this math question.";
 
         const messages = [
           {
             role: "system",
             content:
-              "You are a friendly AI math tutor for high school students. Explain answers clearly and step by step. Use simple language and help the student understand instead of only giving the answer."
+              "You are a friendly AI math tutor for high school students. Explain math clearly and step-by-step using simple language. Help the student understand the answer."
           },
           {
             role: "user",
-            content: data.question || "Please help me with this math question."
+            content: question
           }
         ];
 
-        const input = {
-          messages
-        };
+        let result;
 
-        // If the student uploaded an image, send it to the vision model
+        // --------------------------------------
+        // If there is an image, use Vision AI
+        // --------------------------------------
+
         if (data.image) {
-          input.image = data.image;
-        }
 
-        const result = await env.AI.run(
-          "@cf/meta/llama-3.2-11b-vision-instruct",
-          input
-        );
+          result = await env.AI.run(
+            "@cf/meta/llama-3.2-11b-vision-instruct",
+            {
+              messages: messages,
+              image: data.image
+            }
+          );
+
+        } else {
+
+          // --------------------------------------
+          // Normal text question
+          // --------------------------------------
+
+          result = await env.AI.run(
+            "@cf/meta/llama-3.2-3b-instruct",
+            {
+              messages: messages,
+              max_tokens: 512
+            }
+          );
+        }
 
         return Response.json(result, {
           headers: {
             "Access-Control-Allow-Origin": "*"
           }
         });
+
       } catch (error) {
+
+        console.error("AI ERROR:", error);
+
         return Response.json(
           {
-            error: "Something went wrong with the AI Tutor."
+            error:
+              "AI error: " +
+              (error.message || "Unknown error")
           },
           {
             status: 500,
