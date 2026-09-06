@@ -1,5 +1,5 @@
 // ======================================
-// MATH HUB - BASIC INTERACTIONS
+// MATH HUB - FULL SCRIPT
 // ======================================
 
 // --------------------------------------
@@ -24,40 +24,53 @@ navButtons.forEach(button => {
 // --------------------------------------
 
 const uploadBox = document.querySelector(".upload-box");
-const fileInput = uploadBox.querySelector("input");
+const fileInput = uploadBox ? uploadBox.querySelector("input") : null;
 
 let selectedImageData = null;
 
-uploadBox.addEventListener("click", () => {
-  fileInput.click();
-});
+if (uploadBox && fileInput) {
 
-fileInput.addEventListener("change", () => {
-  if (fileInput.files.length > 0) {
-    const file = fileInput.files[0];
+  uploadBox.addEventListener("click", () => {
+    fileInput.click();
+  });
 
-    // Keep images reasonably small
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Please choose an image smaller than 5 MB.");
-      fileInput.value = "";
+  fileInput.addEventListener("change", () => {
+
+    if (fileInput.files.length === 0) {
       return;
     }
 
-    const fileName = file.name;
+    const file = fileInput.files[0];
 
-    uploadBox.querySelector("h3").textContent = "Image Selected! ✅";
-    uploadBox.querySelector("p").textContent = fileName;
+    // Maximum image size: 5 MB
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Please choose an image smaller than 5 MB.");
+      fileInput.value = "";
+      selectedImageData = null;
+      return;
+    }
 
-    // Convert image to data that can be sent to the AI
     const reader = new FileReader();
 
     reader.onload = () => {
+
       selectedImageData = reader.result;
+
+      const title = uploadBox.querySelector("h3");
+      const paragraph = uploadBox.querySelector("p");
+
+      if (title) {
+        title.textContent = "Image Selected! ✅";
+      }
+
+      if (paragraph) {
+        paragraph.textContent = file.name;
+      }
     };
 
     reader.readAsDataURL(file);
-  }
-});
+  });
+}
 
 
 // --------------------------------------
@@ -68,14 +81,18 @@ const chatInput = document.querySelector(".chat-box input");
 const chatButton = document.querySelector(".chat-box button");
 const answerBox = document.querySelector(".answer-box");
 
-// Cloudflare Worker AI endpoint
 const AI_API_URL =
   "https://my-school-hub.lamisalabed36.workers.dev/api/tutor";
 
+
 async function askAI() {
+
+  if (!chatInput || !answerBox) {
+    return;
+  }
+
   const question = chatInput.value.trim();
 
-  // Make sure there is either text or an image
   if (question === "" && !selectedImageData) {
     alert("Please type a math question or upload a picture first!");
     return;
@@ -87,7 +104,13 @@ async function askAI() {
     <p>🧠 Thinking about your question...</p>
   `;
 
+  if (chatButton) {
+    chatButton.disabled = true;
+    chatButton.textContent = "Thinking...";
+  }
+
   try {
+
     const response = await fetch(AI_API_URL, {
       method: "POST",
 
@@ -96,65 +119,145 @@ async function askAI() {
       },
 
       body: JSON.stringify({
-        question: question,
+        question:
+          question ||
+          "Please solve the math problem in this image and explain it step by step.",
         image: selectedImageData
       })
     });
 
-    const data = await response.json();
 
+    // Try to read the JSON response
+    const data = await response.json().catch(() => ({}));
+
+
+    // If Cloudflare returned an error
     if (!response.ok) {
+
       throw new Error(
-        data.error || "The AI request failed."
+        data.error ||
+        `The AI server returned an error (${response.status}).`
       );
     }
 
-    // Get the AI's answer
+
+    // ----------------------------------
+    // Get the AI answer
+    // ----------------------------------
+
     const answer =
+      data.choices?.[0]?.message?.content ||
       data.response ||
       data.result?.response ||
       data.text ||
-      "Sorry, I couldn't answer that question.";
+      data.result?.text ||
+      "";
 
-    // Display the answer safely
-    answerBox.innerHTML = `
-      <strong>🤖 Math Hub AI</strong>
-      <p class="ai-response"></p>
-    `;
 
-    answerBox.querySelector(".ai-response").textContent = answer;
+    if (!answer) {
 
-    // Clear the question and image
+      throw new Error(
+        "The AI connected, but it did not send back an answer."
+      );
+    }
+
+
+    // ----------------------------------
+    // Display answer safely
+    // ----------------------------------
+
+    answerBox.innerHTML = "";
+
+    const title = document.createElement("strong");
+    title.textContent = "🤖 Math Hub AI";
+
+    const answerParagraph = document.createElement("p");
+    answerParagraph.textContent = answer;
+
+    answerBox.appendChild(title);
+    answerBox.appendChild(answerParagraph);
+
+
+    // Clear the question
     chatInput.value = "";
-    selectedImageData = null;
-    fileInput.value = "";
 
-    uploadBox.querySelector("h3").textContent = "Upload Image";
-    uploadBox.querySelector("p").textContent =
-      "Click to upload a math question";
+
+    // Clear selected image
+    selectedImageData = null;
+
+    if (fileInput) {
+      fileInput.value = "";
+    }
+
+    if (uploadBox) {
+
+      const titleElement = uploadBox.querySelector("h3");
+      const paragraphElement = uploadBox.querySelector("p");
+
+      if (titleElement) {
+        titleElement.textContent = "Upload a Math Question 📷";
+      }
+
+      if (paragraphElement) {
+        paragraphElement.textContent =
+          "Take a picture of your math problem";
+      }
+    }
 
   } catch (error) {
-    console.error("AI Error:", error);
 
-    answerBox.innerHTML = `
-      <strong>🤖 Math Hub AI</strong>
-      <p>❌ Sorry, something went wrong.</p>
-      <p>Please try again in a moment.</p>
-    `;
+    console.error("Math Hub AI Error:", error);
+
+    answerBox.innerHTML = "";
+
+    const title = document.createElement("strong");
+    title.textContent = "🤖 Math Hub AI";
+
+    const errorParagraph = document.createElement("p");
+
+    errorParagraph.textContent =
+      "❌ " +
+      (error.message ||
+        "Sorry, something went wrong. Please try again.");
+
+    answerBox.appendChild(title);
+    answerBox.appendChild(errorParagraph);
+
+  } finally {
+
+    if (chatButton) {
+      chatButton.disabled = false;
+      chatButton.textContent = "Ask AI";
+    }
   }
 }
 
 
-// Send button
-chatButton.addEventListener("click", askAI);
+// --------------------------------------
+// Ask AI Button
+// --------------------------------------
+
+if (chatButton) {
+  chatButton.addEventListener("click", askAI);
+}
 
 
-// Press Enter to send
-chatInput.addEventListener("keydown", event => {
-  if (event.key === "Enter") {
-    askAI();
-  }
-});
+// --------------------------------------
+// Enter Key
+// --------------------------------------
+
+if (chatInput) {
+
+  chatInput.addEventListener("keydown", event => {
+
+    if (event.key === "Enter") {
+
+      event.preventDefault();
+
+      askAI();
+    }
+  });
+}
 
 
 // --------------------------------------
@@ -165,16 +268,23 @@ const courseButtons =
   document.querySelectorAll(".course-card button");
 
 courseButtons.forEach(button => {
+
   button.addEventListener("click", () => {
 
+    const courseElement =
+      button.parentElement.querySelector("h3");
+
     const course =
-      button.parentElement.querySelector("h3").textContent;
+      courseElement
+        ? courseElement.textContent
+        : "This course";
 
     alert(
       course +
       " will open its lessons, topics, examples, practice questions and AI tutor."
     );
   });
+
 });
 
 
@@ -185,35 +295,57 @@ courseButtons.forEach(button => {
 const addTaskButton =
   document.querySelector(".add-task");
 
-addTaskButton.addEventListener("click", () => {
+if (addTaskButton) {
 
-  const taskName =
-    prompt("What task do you want to add?");
+  addTaskButton.addEventListener("click", () => {
 
-  if (!taskName) {
-    return;
-  }
+    const taskName =
+      prompt("What task do you want to add?");
 
-  const task = document.createElement("div");
+    if (!taskName) {
+      return;
+    }
 
-  task.className = "task pink-task";
+    const task =
+      document.createElement("div");
 
-  task.innerHTML = `
-    <strong>New</strong>
+    task.className = "task pink-task";
 
-    <div>
-      <b></b>
-      <p>Added to your planner</p>
-    </div>
+    const strong =
+      document.createElement("strong");
 
-    <input type="checkbox">
-  `;
+    strong.textContent = "New";
 
-  // Put the user's task name into the page safely
-  task.querySelector("b").textContent = taskName;
+    const div =
+      document.createElement("div");
 
-  addTaskButton.before(task);
-});
+    const bold =
+      document.createElement("b");
+
+    bold.textContent = taskName;
+
+    const paragraph =
+      document.createElement("p");
+
+    paragraph.textContent =
+      "Added to your planner";
+
+    div.appendChild(bold);
+    div.appendChild(paragraph);
+
+    const checkbox =
+      document.createElement("input");
+
+    checkbox.type = "checkbox";
+
+    task.appendChild(strong);
+    task.appendChild(div);
+    task.appendChild(checkbox);
+
+    addTaskButton.before(task);
+  });
+
+}
 
 
 // --------------------------------------
@@ -222,4 +354,4 @@ addTaskButton.addEventListener("click", () => {
 
 console.log("🎓 Math Hub is ready!");
 console.log("📚 Courses loaded.");
-console.log("🤖 AI Tutor is connected!");
+console.log("🤖 AI Tutor connected.");
