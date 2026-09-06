@@ -2,7 +2,6 @@
 // MATH HUB - BASIC INTERACTIONS
 // ======================================
 
-
 // --------------------------------------
 // Navigation
 // --------------------------------------
@@ -10,17 +9,13 @@
 const navButtons = document.querySelectorAll(".nav-btn");
 
 navButtons.forEach(button => {
-
   button.addEventListener("click", () => {
-
     navButtons.forEach(btn => {
       btn.classList.remove("active");
     });
 
     button.classList.add("active");
-
   });
-
 });
 
 
@@ -31,23 +26,37 @@ navButtons.forEach(button => {
 const uploadBox = document.querySelector(".upload-box");
 const fileInput = uploadBox.querySelector("input");
 
+let selectedImageData = null;
+
 uploadBox.addEventListener("click", () => {
   fileInput.click();
 });
 
 fileInput.addEventListener("change", () => {
-
   if (fileInput.files.length > 0) {
+    const file = fileInput.files[0];
 
-    const fileName = fileInput.files[0].name;
+    // Keep images reasonably small
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Please choose an image smaller than 5 MB.");
+      fileInput.value = "";
+      return;
+    }
+
+    const fileName = file.name;
 
     uploadBox.querySelector("h3").textContent = "Image Selected! ✅";
+    uploadBox.querySelector("p").textContent = fileName;
 
-    uploadBox.querySelector("p").textContent =
-      fileName;
+    // Convert image to data that can be sent to the AI
+    const reader = new FileReader();
 
+    reader.onload = () => {
+      selectedImageData = reader.result;
+    };
+
+    reader.readAsDataURL(file);
   }
-
 });
 
 
@@ -59,48 +68,92 @@ const chatInput = document.querySelector(".chat-box input");
 const chatButton = document.querySelector(".chat-box button");
 const answerBox = document.querySelector(".answer-box");
 
-function askAI() {
+// Cloudflare Worker AI endpoint
+const AI_API_URL =
+  "https://my-school-hub.lamisalabed36.workers.dev/api/tutor";
 
+async function askAI() {
   const question = chatInput.value.trim();
 
-  if (question === "") {
-    alert("Please type a math question first!");
+  // Make sure there is either text or an image
+  if (question === "" && !selectedImageData) {
+    alert("Please type a math question or upload a picture first!");
     return;
   }
 
+  // Show loading message
   answerBox.innerHTML = `
     <strong>🤖 Math Hub AI</strong>
-
-    <p>
-      I received your question:
-    </p>
-
-    <div class="question-bubble">
-      ${question}
-    </div>
-
-    <p>
-      🧠 AI Tutor is being connected next!
-    </p>
-
-    <p>
-      When the AI is connected, I'll be able to explain
-      your math question step-by-step.
-    </p>
+    <p>🧠 Thinking about your question...</p>
   `;
 
-  chatInput.value = "";
+  try {
+    const response = await fetch(AI_API_URL, {
+      method: "POST",
 
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        question: question,
+        image: selectedImageData
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "The AI request failed."
+      );
+    }
+
+    // Get the AI's answer
+    const answer =
+      data.response ||
+      data.result?.response ||
+      data.text ||
+      "Sorry, I couldn't answer that question.";
+
+    // Display the answer safely
+    answerBox.innerHTML = `
+      <strong>🤖 Math Hub AI</strong>
+      <p class="ai-response"></p>
+    `;
+
+    answerBox.querySelector(".ai-response").textContent = answer;
+
+    // Clear the question and image
+    chatInput.value = "";
+    selectedImageData = null;
+    fileInput.value = "";
+
+    uploadBox.querySelector("h3").textContent = "Upload Image";
+    uploadBox.querySelector("p").textContent =
+      "Click to upload a math question";
+
+  } catch (error) {
+    console.error("AI Error:", error);
+
+    answerBox.innerHTML = `
+      <strong>🤖 Math Hub AI</strong>
+      <p>❌ Sorry, something went wrong.</p>
+      <p>Please try again in a moment.</p>
+    `;
+  }
 }
 
+
+// Send button
 chatButton.addEventListener("click", askAI);
 
-chatInput.addEventListener("keydown", event => {
 
+// Press Enter to send
+chatInput.addEventListener("keydown", event => {
   if (event.key === "Enter") {
     askAI();
   }
-
 });
 
 
@@ -108,10 +161,10 @@ chatInput.addEventListener("keydown", event => {
 // Course Buttons
 // --------------------------------------
 
-const courseButtons = document.querySelectorAll(".course-card button");
+const courseButtons =
+  document.querySelectorAll(".course-card button");
 
 courseButtons.forEach(button => {
-
   button.addEventListener("click", () => {
 
     const course =
@@ -121,9 +174,7 @@ courseButtons.forEach(button => {
       course +
       " will open its lessons, topics, examples, practice questions and AI tutor."
     );
-
   });
-
 });
 
 
@@ -151,15 +202,17 @@ addTaskButton.addEventListener("click", () => {
     <strong>New</strong>
 
     <div>
-      <b>${taskName}</b>
+      <b></b>
       <p>Added to your planner</p>
     </div>
 
     <input type="checkbox">
   `;
 
-  addTaskButton.before(task);
+  // Put the user's task name into the page safely
+  task.querySelector("b").textContent = taskName;
 
+  addTaskButton.before(task);
 });
 
 
@@ -169,4 +222,4 @@ addTaskButton.addEventListener("click", () => {
 
 console.log("🎓 Math Hub is ready!");
 console.log("📚 Courses loaded.");
-console.log("🤖 AI Tutor interface loaded.");
+console.log("🤖 AI Tutor is connected!");
