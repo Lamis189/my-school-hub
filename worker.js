@@ -18,39 +18,48 @@ export default {
       try {
         const data = await request.json();
 
-        const question = data.question || 
-          "Please explain this math question step by step.";
+        const question =
+          data.question ||
+          "Please solve the math problem in the image and explain it step by step.";
+
+        let userContent = [
+          {
+            type: "text",
+            text: question
+          }
+        ];
+
+        // Add the uploaded image directly to the user's message
+        if (data.image) {
+          userContent.push({
+            type: "image",
+            url: data.image
+          });
+        }
 
         const messages = [
           {
             role: "system",
             content:
-              "You are Math Hub AI, a friendly high-school math tutor. Explain math clearly and step by step using simple language. Do not just give the answer; help the student understand."
+              "You are Math Hub AI, a friendly high-school math tutor. If an image is provided, carefully read the math problem in the image. Explain the solution clearly and step by step using simple language. Do not just give the final answer."
           },
           {
             role: "user",
-            content: question
+            content: userContent
           }
         ];
 
-        const input = {
-          messages: messages,
-
-          chat_template_kwargs: {
-            enable_thinking: false
-          },
-
-          max_tokens: 512
-        };
-
-        // Add the uploaded image if there is one
-        if (data.image) {
-          input.image = data.image;
-        }
-
         const result = await env.AI.run(
           "@cf/google/gemma-4-26b-a4b-it",
-          input
+          {
+            messages: messages,
+
+            chat_template_kwargs: {
+              enable_thinking: false
+            },
+
+            max_tokens: 512
+          }
         );
 
         return Response.json(result, {
