@@ -1,7 +1,6 @@
 export default {
   async fetch(request, env) {
 
-    // Allow the website to communicate with the AI
     if (request.method === "OPTIONS") {
       return new Response(null, {
         headers: {
@@ -14,21 +13,19 @@ export default {
 
     const url = new URL(request.url);
 
-    // AI Tutor
     if (url.pathname === "/api/tutor" && request.method === "POST") {
 
       try {
         const data = await request.json();
 
-        const question =
-          data.question ||
-          "Please help me with this math question.";
+        const question = data.question || 
+          "Please explain this math question step by step.";
 
         const messages = [
           {
             role: "system",
             content:
-              "You are a friendly AI math tutor for high school students. Explain math clearly and step-by-step using simple language. Help the student understand the answer."
+              "You are Math Hub AI, a friendly high-school math tutor. Explain math clearly and step by step using simple language. Do not just give the answer; help the student understand."
           },
           {
             role: "user",
@@ -36,64 +33,50 @@ export default {
           }
         ];
 
-        let result;
+        const input = {
+          messages: messages,
 
-        // --------------------------------------
-        // If there is an image, use Vision AI
-        // --------------------------------------
+          chat_template_kwargs: {
+            enable_thinking: false
+          },
 
+          max_tokens: 512
+        };
+
+        // Add the uploaded image if there is one
         if (data.image) {
-
-          result = await env.AI.run(
-            "@cf/meta/llama-3.2-11b-vision-instruct",
-            {
-              messages: messages,
-              image: data.image
-            }
-          );
-
-        } else {
-
-          // --------------------------------------
-          // Normal text question
-          // --------------------------------------
-
-          result = await env.AI.run(
-            "@cf/meta/llama-3.2-3b-instruct",
-            {
-              messages: messages,
-              max_tokens: 512
-            }
-          );
+          input.image = data.image;
         }
+
+        const result = await env.AI.run(
+          "@cf/google/gemma-4-26b-a4b-it",
+          input
+        );
 
         return Response.json(result, {
           headers: {
-            "Access-Control-Allow-Origin": "*"
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json"
           }
         });
 
       } catch (error) {
 
-        console.error("AI ERROR:", error);
-
         return Response.json(
           {
-            error:
-              "AI error: " +
-              (error.message || "Unknown error")
+            error: error.message || "Unknown AI error"
           },
           {
             status: 500,
             headers: {
-              "Access-Control-Allow-Origin": "*"
+              "Access-Control-Allow-Origin": "*",
+              "Content-Type": "application/json"
             }
           }
         );
       }
     }
 
-    // Show the normal website
     return env.ASSETS.fetch(request);
   }
 };
