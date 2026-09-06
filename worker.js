@@ -1,58 +1,65 @@
 export default {
   async fetch(request, env) {
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type"
+    };
 
+    // Allow browser requests
     if (request.method === "OPTIONS") {
       return new Response(null, {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type"
-        }
+        headers: corsHeaders
       });
     }
 
     const url = new URL(request.url);
 
+    // AI Tutor endpoint
     if (url.pathname === "/api/tutor" && request.method === "POST") {
-
       try {
         const data = await request.json();
 
         const question =
           data.question ||
-          "Please solve the math problem in the image and explain it step by step.";
+          "Please solve the math problem in this image and explain it step by step.";
 
-        let userContent = [
+        // Build the user's message
+        const userContent = [
           {
             type: "text",
             text: question
           }
         ];
 
-        // Add the uploaded image directly to the user's message
+        // Add the uploaded image
         if (data.image) {
           userContent.push({
-            type: "image",
-            url: data.image
+            type: "image_url",
+            image_url: {
+              url: data.image
+            }
           });
         }
 
-        const messages = [
-          {
-            role: "system",
-            content:
-              "You are Math Hub AI, a friendly high-school math tutor. If an image is provided, carefully read the math problem in the image. Explain the solution clearly and step by step using simple language. Do not just give the final answer."
-          },
-          {
-            role: "user",
-            content: userContent
-          }
-        ];
-
+        // Ask Gemma 4
         const result = await env.AI.run(
           "@cf/google/gemma-4-26b-a4b-it",
           {
-            messages: messages,
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You are Math Hub AI, a friendly high-school math tutor. " +
+                  "If an image is provided, carefully read the math problem in the image. " +
+                  "Explain the solution clearly and step by step using simple language. " +
+                  "Do not just give the final answer. Help the student understand each step."
+              },
+              {
+                role: "user",
+                content: userContent
+              }
+            ],
 
             chat_template_kwargs: {
               enable_thinking: false
@@ -62,23 +69,25 @@ export default {
           }
         );
 
+        // Send the AI result back to the website
         return Response.json(result, {
           headers: {
-            "Access-Control-Allow-Origin": "*",
+            ...corsHeaders,
             "Content-Type": "application/json"
           }
         });
 
       } catch (error) {
+        console.error("AI Tutor Error:", error);
 
         return Response.json(
           {
-            error: error.message || "Unknown AI error"
+            error: error?.message || "Unknown AI error"
           },
           {
             status: 500,
             headers: {
-              "Access-Control-Allow-Origin": "*",
+              ...corsHeaders,
               "Content-Type": "application/json"
             }
           }
@@ -86,6 +95,7 @@ export default {
       }
     }
 
+    // Serve the website normally
     return env.ASSETS.fetch(request);
   }
 };
